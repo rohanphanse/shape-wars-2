@@ -385,7 +385,7 @@ class Enemy {
 
         this.speed = 1
         this.edgeOffset = 50
-        this.image = "/images/enemy.png"
+        this.image = "images/enemy.png"
         this.shootInterval = 2000 + Math.round(randomNumber(-500, 500))
         this.size = 40
         this.radius = 50

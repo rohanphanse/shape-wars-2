@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset = "utf-8">
+    <meta name = "viewport" content = "width=device-width">
+    <title>AP Create Task</title>
+    
+    <link href = "images/circle.svg" rel = "icon" type = "image/svg" />
+    <link href = "css/style.css" rel = "stylesheet" type = "text/css" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css" integrity="sha384-vSIIfh2YWi9wW0r9iZe7RJPrKwp6bG+s9QZMoITbCckVJqGCCRhc+ccxNcdpHuYu" crossorigin="anonymous">
+
+    <script src = "js/methods.js"></script>
+    <script src = "js/sprites.js"></script>
+    <script src = "js/game.js"></script>
+    <script src = "js/main.js"></script>
+</head>
+
+<body>
+    <div class = "center">
+        <div id = "container">
+            <!-- Map -->
+            <div id = "map"></div>
+
+            <!-- Bar -->
+            <div id = "bar">
+                <!-- Game buttons -->
+                <div id = "game-buttons">
+                    <!-- Pause button -->
+                    <div id = "pause-button" class = "game-button" >
+                        <div id = "pause-icon" class = "fas fa-pause"></div>
+                    </div>
+                    <!-- Home button -->
+                    <div id = "home-button" class = "game-button">
+                        <div id = "home-icon" class = "fas fa-home"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Home page -->
+            <div id = "home">
+                <!-- Title -->
+                <div id = "title">Shape Wars</div>
+                <!-- Navigation buttons -->
+                <div id = "nav-buttons">
+                    <div id = "play-button" class = "nav-button">Play</div>
+                    <div id = "resume-button" class = "nav-button">Resume</div>
+                    <div id = "rules-button" class = "nav-button">Rules</div>
+                </div>
+                <!-- Score -->
+                <div id = "score"></div>
+                <div id = "high-score"></div>
+            </div>
+
+            <!-- Rules page -->
+            <div id = "rules">
+                <!-- Title -->
+                <div id = "rules-title">Rules</div>
+
+                <!-- Panels -->
+                <div id = "panels">
+                    <!-- Arrow panel -->
+                    <div class = "panel">
+                        <div class = "panel-content">
+                            <div class = "panel-front">
+                                <div class = "panel-image-container">
+                                    <img src = "images/arrow.png" id = "panel-arrow-image" />
+                                </div>
+                                <div class = "panel-text">Move and shoot</div>
+                            </div>
+                            <div class = "panel-back">
+                                Health: 100<br>Power: 10<br>Respawn: 4s<br>Reload: 0.2s<br><br>Move: WASD<br>Shoot: Space<br>or Mouse
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Circle panel -->
+                    <div class = "panel">
+                        <div class = "panel-content">
+                            <div class = "panel-front">
+                                <div class = "panel-image-container">
+                                    <img src = "images/circle.svg" id = "panel-circle-image" />
+                                </div>
+                                <div class = "panel-text">Defend the circle</div>
+                            </div>
+                            <div class = "panel-back">
+                                Health: 500<br><br>Autoshoot: C<br>Pause: P<br>Home: H<br><br>If the circle dies, it's game over!
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Enemy panel -->
+                    <div class = "panel">
+                        <div class = "panel-content">
+                            <div class = "panel-front">
+                                <div class = "panel-image-container">
+                                    <img src = "images/enemy.png" id = "panel-enemy-image" />
+                                </div>
+                                <div class = "panel-text">Destroy enemies</div>
+                            </div>
+                            <div class = "panel-back">
+                                Health: 100<br>Power: 10<br>Reload: 2s<br><br>Enemies attack in waves and aim for the nearest target.
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Back button -->
+            <!-- Navigate from rules page to home page -->
+            <div id = "back-button">
+                <div class = "fas fa-chevron-left"></div>
+            </div>
+
+            <!-- Veil -->
+            <!-- Add layer of opacity over game -->
+            <div id = "veil"></div>
+        </div>
+    </div>
+</body>
+
+</html>

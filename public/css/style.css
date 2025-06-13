@@ -1,15 +1,13 @@
-@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600&display=swap");
 
 * {
-    border: none;
-    outline: none;
     box-sizing: border-box;
-    margin: 0;
-    padding: 0;
 }
 
 body {
     font-family: "Open Sans", sans-serif;
+    overflow: hidden;
+    margin: 0;
 }
 
 .center {
@@ -58,7 +56,7 @@ body {
     border: 1px solid rgb(163, 163, 163);
     border-radius: 2.5px;
     transform: translateX(-50%);
-    bottom: 0;
+    bottom: -5px;
     left: 50%;
 }
 
@@ -69,13 +67,23 @@ body {
     transition-duration: 0.1s;
 }
 
-#arrow-image {
+.arrow-image {
     width: 30px;
 }
 
-#arrow {
+.arrow {
     width: 35px;
-    height: 50px;
+    height: 35px;
+    position: absolute;
+}
+
+.name-label {
+    position: absolute;
+    bottom: -25px;
+    left: 17.5px;
+    text-align: center;
+    transform: translateX(-50%);
+    font-weight: 500;
 }
 
 #circle-image {
@@ -294,14 +302,20 @@ body {
 }
 
 #score {
-    margin-top: 15px;
+    margin-top: 5px;
     font-weight: 600;
     font-size: 1.5rem;
     color: rgb(73, 73, 73);
+    display: none;
 }
 
 #high-score {
     margin-top: 5px;
     font-size: 0.9rem;
     color: rgb(136, 136, 136);
+    display: none;
+}
+
+.name-label {
+    text-align: center;
 }

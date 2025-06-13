@@ -1,10 +1,16 @@
 class Game {
-    constructor () {
+    constructor (socket) {
         // Sprites
-        this.arrow = null
+        this.arrows = []
         this.enemies = []
         this.projectiles = []
         this.circle = null
+        this.socket = socket
+        this.players = []
+        this.colors = []
+
+        this.arrows = {}
+        this.mouse_positions = {}
 
         // Elements
         this.map = document.getElementById("map")
@@ -14,8 +20,6 @@ class Game {
         this.homeButton = document.getElementById("home-button")
 
         this.home = document.getElementById("home")
-        this.playButton = document.getElementById("play-button")
-        this.resumeButton = document.getElementById("resume-button")
         this.rules = document.getElementById("rules")
         this.rulesButton = document.getElementById("rules-button")
 
@@ -34,36 +38,37 @@ class Game {
         this.keysDown = []
         this.wave = 0
         this.noClick = [this.pauseButton, this.homeButton]
+        this.dt = 1
 
         // Event listeners
 
         // Key down
-        this.keyDownListener = ["keydown", event => {
+        this.keyDownListener = ["keydown", (event) => {
             if (event.keyCode in KEY_TO_NAME) {
                 event.preventDefault()
-                // Only add key if not already in list of keys down
-                if (!this.keysDown.includes(KEY_TO_NAME[event.keyCode])) {
-                    this.keysDown.push(KEY_TO_NAME[event.keyCode])
-                    this.arrow.keysDown = this.keysDown
-                }
-                if (KEY_TO_NAME[event.keyCode] === "space") {
-                    this.arrowShoot()
-                }
+                socket.emit("keydown", KEY_TO_NAME[event.keyCode])
             }
         }]
 
-        // Key up
-        this.keyUpListener = ["keyup", event => {
+        this.keyUpListener = ["keyup", (event) => {
             if (event.keyCode in KEY_TO_NAME) {
-                const index = this.keysDown.indexOf(KEY_TO_NAME[event.keyCode])
-                if (index > -1) {
-                    this.keysDown.splice(index, 1)
-                    this.arrow.keysDown = this.keysDown
-                }
-            } else if (event.keyCode === 67 && !event.shiftKey && !event.ctrlKey) {
-                this.autoShoot = !this.autoShoot
+                event.preventDefault()
+                socket.emit("keyup", KEY_TO_NAME[event.keyCode])
             }
         }]
+    
+        // Key up
+        // this.keyUpListener = ["keyup", event => {
+        //     if (event.keyCode in KEY_TO_NAME) {
+        //         const index = this.keysDown.indexOf(KEY_TO_NAME[event.keyCode])
+        //         if (index > -1) {
+        //             this.keysDown.splice(index, 1)
+        //             this.arrow.keysDown = this.keysDown
+        //         }
+        //     } else if (event.keyCode === 67 && !event.shiftKey && !event.ctrlKey) {
+        //         this.autoShoot = !this.autoShoot
+        //     }
+        // }]
 
         // Prevent context menu from opening over map
         this.contextMenuListener = ["contextmenu", event => {
@@ -72,7 +77,6 @@ class Game {
 
         // Mouse down
         this.mouseDownListener = ["mousedown", event => {
-            console.log(event.target)
             if (!this.keysDown.includes("space") && !this.noClick.includes(event.target)) {
                 this.keysDown.push("space")
                 this.arrow.keysDown = this.keysDown
@@ -92,7 +96,6 @@ class Game {
         this.pauseButton.addEventListener("click", () => this.pause())
         
         document.addEventListener("keyup", event => {
-            console.log(event.keyCode)
             // P key pressed
             if (event.keyCode === 80) {
                 this.pause()
@@ -104,14 +107,13 @@ class Game {
         })
 
         // Start game
-        this.playButton.addEventListener("click", () => {
-            this.start()
-            this.home.style.display = "none"
-        })
+        // this.playButton.addEventListener("click", () => {
+        //     this.start()
+        //     this.home.style.display = "none"
+        // })
 
         // Toggle home page
         this.homeButton.addEventListener("click", () => this.homeToggle())
-        this.resumeButton.addEventListener("click", () => this.homeToggle())
 
         // Open rules page
         this.rulesButton.addEventListener("click", () => {
@@ -132,9 +134,26 @@ class Game {
         this.updateScore()
     }
 
+    draw_frame(frame) {
+        for (const name in frame.arrows) {
+            this.arrows[name].position = frame.arrows[name].position
+            console.log(name, "position", this.arrows[name].position)
+            this.arrows[name].direction = frame.arrows[name].direction
+            this.arrows[name].draw()
+        }
+    }
+
     start() {
         // Clear map
         this.map.textContent = ""
+        this.home.style.display = "none"
+
+        for (let i = 0; i < this.players.length; i++) {
+            this.arrows[this.players[i]] = new Arrow(this.players[i], this.colors[i], { x: 0, y: (this.players.length / 2 - i - 0.5) * HEIGHT / 2 / this.players.length })
+        }
+
+        this.addListeners()
+        return 
         
         // Reset sprites
         this.arrow = new Arrow()
@@ -146,25 +165,28 @@ class Game {
         this.wave = 0
         this.paused = false
         this.gameOver = false
+        this.waiting = false
 
         // Initial
-        this.addListeners()
         this.enableButtons()
         this.updateScore()
 
-        this.resumeButton.style.display = "flex"
         this.veil.style.display = "none"
-        this.playButton.innerText = "Restart"
 
-        this.frame = () => {
+        this.last_frame_time = performance.now()
+
+        this.frame = (current_time) => {
+            this.dt = (current_time - this.last_frame_time) / 1000 // Seconds
+            this.last_frame_time = current_time
+
             // Game over
             if (this.circle.health === 0 && !this.gameOver) {
                 this.end()
             }
 
             // Arrow
-            this.updateArrowPosition()
-            this.arrow.draw()
+            this.updateArrowPosition(this.dt)
+            this.arrow.draw(this.dt)
 
             if ((this.keysDown.includes("space") || this.autoShoot) && this.arrowCanShoot) {
                 this.arrowShoot()
@@ -177,7 +199,7 @@ class Game {
                     // Add index of projectile to be deleted to list
                     deletedProjectiles.push(i)
                 } else {
-                    this.projectiles[i].draw()
+                    this.projectiles[i].draw(this.dt)
                 }
             }
             // Projectiles to be deleted
@@ -237,12 +259,16 @@ class Game {
             }
 
             // Next wave
-            if (this.enemies.length === 0) {
+            if (this.enemies.length === 0 && !this.waiting) {
                 // Increment number of enemies in wave by 1
                 this.wave++
-                for (let w = 0; w < this.wave; w++) {
-                    this.enemies.push(new Enemy())
-                }
+                this.waiting = true
+                setTimeout(() => {
+                    for (let w = 0; w < this.wave; w++) {
+                        this.enemies.push(new Enemy())
+                    }
+                    this.waiting = false
+                }, 3000)
             }
 
             // Next frame
@@ -260,8 +286,6 @@ class Game {
         this.gameOver = true
         this.map.style.transitionDuration = "1s"
         this.map.style.opacity = "0"
-        this.playButton.innerText = "Play"
-        this.resumeButton.style.display = "none"
         this.disableButtons()
 
         setTimeout(() => {
@@ -342,7 +366,7 @@ class Game {
         // But it gives the option to use data from other sprites
         // To determine the position of the arrow
         if (this.arrow.alive) {
-            const pos = this.arrow.updatePosition()
+            const pos = this.arrow.updatePosition(this.dt)
             let can_update = true
             
             if (can_update) {
@@ -358,7 +382,7 @@ class Game {
                 enemy.canMove = false
                 enemy.canShoot = true
             }
-            enemy.updatePosition()
+            enemy.updatePosition(this.dt)
         } else {
             // Determine enemy target: circle or arrow
             // Target is sprite that is closer
@@ -395,6 +419,7 @@ class Game {
         // Game listeners
         document.addEventListener(...this.keyDownListener)
         document.addEventListener(...this.keyUpListener)
+        return
         this.map.addEventListener(...this.contextMenuListener)
         document.addEventListener(...this.mouseDownListener)
         document.addEventListener(...this.mouseUpListener)

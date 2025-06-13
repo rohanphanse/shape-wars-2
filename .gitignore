@@ -1,0 +1,7 @@
+server.js
+package.json
+package-lock.json
+node_modules
+/game.js
+/sprites.js
+*.env

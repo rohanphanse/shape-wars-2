@@ -7,9 +7,12 @@
     <title>AP Create Task</title>
     
     <link href = "images/circle.svg" rel = "icon" type = "image/svg" />
+    <link href = "css/lobby.css" rel = "stylesheet" type = "text/css" />
     <link href = "css/style.css" rel = "stylesheet" type = "text/css" />
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css" integrity="sha384-vSIIfh2YWi9wW0r9iZe7RJPrKwp6bG+s9QZMoITbCckVJqGCCRhc+ccxNcdpHuYu" crossorigin="anonymous">
 
+    <script src="/socket.io/socket.io.js"></script>
+    <script src = "js/config.js"></script>
     <script src = "js/methods.js"></script>
     <script src = "js/sprites.js"></script>
     <script src = "js/game.js"></script>
@@ -43,13 +46,27 @@
                 <div id = "title">Shape Wars</div>
                 <!-- Navigation buttons -->
                 <div id = "nav-buttons">
-                    <div id = "play-button" class = "nav-button">Play</div>
-                    <div id = "resume-button" class = "nav-button">Resume</div>
                     <div id = "rules-button" class = "nav-button">Rules</div>
                 </div>
                 <!-- Score -->
                 <div id = "score"></div>
                 <div id = "high-score"></div>
+                <div id = "welcome-message"></div>
+                <div id = "invite-link-section">
+                    Invite link: 
+                    <input id = "invite-link" value="http://localhost:3000?g=" readonly />
+                    <button id = "copy-invite-link">Copy</button>
+                </div>
+                <div id = "enter-name-container">
+                    Enter name:
+                    <input id = "enter-name" maxlength="20" autocomplete="off"/>
+                </div>
+                <div id = "enter-lobby">Create new game</div>
+                <div id = "lobby-section">
+                    <div class = "thin-text" id = "lobby-text">Lobby:</div>
+                    <div id = "lobby"></div>
+                </div>
+                <button id = "start-game">Start game</button>
             </div>
 
             <!-- Rules page -->

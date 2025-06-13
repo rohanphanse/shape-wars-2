@@ -16,15 +16,16 @@ const KEY_TO_NAME = {
 
 
 class Arrow {
-    constructor () {
+    constructor (name, color, initial_pos) {
         // Data
-        this.position = {
+        this.position = initial_pos || {
             x: 0,
             y: 0
         }
+        console.log(this.position)
         this.direction = 0
 
-        this.step = 4
+        this.speed = 180
         this.edgeOffset = 25
         this.image = "images/arrow.png"
         this.shootInterval = 200
@@ -32,6 +33,8 @@ class Arrow {
         this.maxHealth = 100
         this.health = this.maxHealth
         this.power = 10
+        this.name = name
+        this.color = color
 
         this.mouse = {
             x: null,
@@ -46,6 +49,7 @@ class Arrow {
         this.arrow = null
         this.arrowImage = null
         this.map = document.getElementById("map")
+        this.nameLabel = null
 
         // Mouse position
         this.mouseMoveListener = ["mousemove", event => {
@@ -61,23 +65,25 @@ class Arrow {
 
     create() {
         // Arrow
-        const arrow = document.createElement("div")
-        arrow.id = "arrow"
-        arrow.className = "sprite"
+        this.arrow = document.createElement("div")
+        this.arrow.className = "sprite arrow"
 
         // Arrow image
-        const arrowImage = document.createElement("img")
-        arrowImage.id = "arrow-image"
-        arrowImage.className = "sprite-image"
-        arrowImage.src = this.image
-        arrowImage.draggable = false
+        this.arrowImage = document.createElement("img")
+        this.arrowImage.className = "sprite-image arrow-image"
+        this.arrowImage.src = this.image
+        this.arrowImage.draggable = false
 
-        arrow.append(arrowImage)
-        this.map.append(arrow)
-        this.arrow = document.getElementById("arrow")
-        this.arrowImage = document.getElementById("arrow-image")
+        this.arrow.append(this.arrowImage)
+        this.map.append(this.arrow)
         
         this.healthBar = new HealthBar(this.arrow)
+
+        this.nameLabel = document.createElement("div")
+        this.nameLabel.innerText = this.name
+        this.nameLabel.style.color = this.color
+        this.nameLabel.className = "name-label"
+        this.arrow.append(this.nameLabel)
     }
 
     updateDirection() {
@@ -96,45 +102,9 @@ class Arrow {
         this.direction = angle 
     }
 
-    updatePosition() {
-        // Create copy of position
-        const pos = { x: this.position.x, y: this.position.y }
-
-        // Translate action to a change in position
-        // Do not move sprite if it will leave the map
-        for (const action of this.keysDown) {
-            switch (action) {
-                case "up":
-                    if (pos.y < HEIGHT / 2 - this.edgeOffset) {
-                        pos.y += this.step
-                    }
-                    break
-                case "down":
-                    if (pos.y > -HEIGHT / 2 + this.edgeOffset) {
-                        pos.y -= this.step
-                    }
-                    break
-                case "right":
-                    if (pos.x < WIDTH / 2 - this.edgeOffset) {
-                        pos.x += this.step
-                    }
-                    break
-                case "left":
-                    if (pos.x > -WIDTH / 2 + this.edgeOffset) {
-                        pos.x -= this.step
-                    }
-                    break
-                case "space":
-                    break
-            }
-        }
-
-        return pos
-    }
-
     draw() {
         if (this.alive) {
-            this.updateDirection()
+            // this.updateDirection(dt)
             this.arrow.style.left = `${WIDTH / 2 + this.position.x}px`
             this.arrow.style.top = `${HEIGHT / 2 - this.position.y}px`
             // CSS 'transform: rotate(...);' rotates clockwise instead of standard counterclockwise
@@ -186,7 +156,7 @@ class Projectile {
         this.position = params.position
         this.direction = params.direction
 
-        this.speed = params.speed || 7
+        this.speed = params.speed || 300 // Pixels per second
         this.edgeOffset = 10
         this.image = params.image || "images/ball.svg"
         this.size = 10
@@ -201,7 +171,6 @@ class Projectile {
         this.map = document.getElementById("map")
 
         this.create()
-        this.draw()
     }
 
     create() {
@@ -221,9 +190,9 @@ class Projectile {
         this.element.style.width = `${this.size}px`
     }
 
-    updatePosition() {
-        this.position.x += this.speed * Math.cos(degToRad(this.direction))
-        this.position.y += this.speed * Math.sin(degToRad(this.direction))
+    updatePosition(dt) {
+        this.position.x += this.speed * dt * Math.cos(degToRad(this.direction))
+        this.position.y += this.speed * dt * Math.sin(degToRad(this.direction))
 
         // Projectile off the map
         if (
@@ -237,8 +206,8 @@ class Projectile {
         }
     }
 
-    draw() {
-        this.updatePosition()
+    draw(dt) {
+        this.updatePosition(dt)
         this.element.style.left = `${WIDTH / 2 + this.position.x}px`
         this.element.style.top = `${HEIGHT / 2 - this.position.y}px`
     }
@@ -383,7 +352,7 @@ class Enemy {
         this.direction = 0
         this.target = null
 
-        this.speed = 1
+        this.speed = 70
         this.edgeOffset = 50
         this.image = "images/enemy.png"
         this.shootInterval = 2000 + Math.round(randomNumber(-500, 500))
@@ -448,9 +417,9 @@ class Enemy {
         this.direction = angle 
     }
 
-    updatePosition() {
-        this.position.x += this.speed * Math.cos(degToRad(this.direction))
-        this.position.y += this.speed * Math.sin(degToRad(this.direction))
+    updatePosition(dt) {
+        this.position.x += this.speed * dt * Math.cos(degToRad(this.direction))
+        this.position.y += this.speed * dt * Math.sin(degToRad(this.direction))
     }
 
     draw() {
